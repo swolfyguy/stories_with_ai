@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+    .chat-container {
+        position: fixed;
+        bottom: 0%;
+        right: 0;
+        width: 85%;
+        /* max-width: 400px; */
+        /* Adjust width as needed */
+        z-index: 1000;
+        /* Ensure it is on top of other elements */
+        right: 10%;
+        background-color: rgb(230, 230, 230);
+    }
+
+    #chat-log {
+        position: fixed;
+        bottom: 15%;
+        width: 70%;
+        position: fixed;
+        bottom: 20%;
+        width: 70%;
+        max-height: 65%;
+        /* Adjust as needed */
+        overflow-y: auto;
+        /* Enables vertical scrolling */
+        background: white;
+        /* Optional: to ensure readability */
+        border: 1px solid #ccc;
+        /* Optional: to add a border */
+        padding: 10px;
+        /* Optional: to add some padding inside the chat log */
+        box-sizing: border-box;
+        /* Ensures padding and border are included in width/height */
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+
+<div class="container">
+
+    <body>
+        <!-- <h1>Chat Room</h1> -->
+        <div id="chat-log"></div>
+        <div class="chat-container border rounded p-3">
+            <div class="chat-messages">
+                <!-- Chat messages go here -->
+            </div>
+            <div class="chat-input mt-3">
+                <div class="input-group mb-3">
+                    <input id="chat-message-input" type="text" class="form-control" placeholder="Enter your message"
+                        aria-label="message" aria-describedby="button-chat">
+                    <button class="btn btn-success" type="button" id="chat-message-submit">Go</button>
+                </div>
+            </div>
+        </div>
+        <!-- <input id="chat-message-input" type="text" size="100">
+        <button id="chat-message-submit">Send</button> -->
+
+        <script>
+            const roomName = "{{ room_name }}";
+            const currentUser = "{{request.user.username}}"
+            const chatSocket = new WebSocket(
+                'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+            );
+
+            chatSocket.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+                if (document.getElementById("chat-log").lastChild !== null) {
+                    const lastResponseClass = document.getElementById("chat-log").lastChild.className.split(" ")[1]
+                    if (lastResponseClass == "alert-primary") {
+                        document.getElementById("chat-log").lastChild.innerHTML += '<br>' + (data.message);
+                    }
+                    else {
+                        document.querySelector('#chat-log').innerHTML += (data.message);
+                    }
+                }
+
+                else {
+                    document.querySelector('#chat-log').innerHTML += (data.message);
+                }
+                console.log("DARA")
+                const chatLog = document.getElementById('chat-log');
+                chatLog.scrollTop = chatLog.scrollHeight;
+            };
+
+            chatSocket.onclose = function (e) {
+                console.error('Chat socket closed unexpectedly');
+                alert("Something went wrong, please refresh the page and try again")
+            };
+
+            document.querySelector('#chat-message-input').focus();
+            document.querySelector('#chat-message-input').onkeyup = function (e) {
+                if (e.keyCode === 13) {  // Enter key
+                    const messageInput = document.querySelector('#chat-message-input');
+                    const message = messageInput.value;
+                    chatSocket.send(JSON.stringify({
+                        'message': message
+                    }));
+                    messageInput.value = '';
+                    const user_input = `<div class="alert alert-success" role="alert"><b>${currentUser} (You):</b> ${message}</div>`
+                    document.querySelector('#chat-log').innerHTML += (user_input);
+                    // window.scrollTo(0, document.body.scrollHeight);
+                    const chatLog = document.getElementById('chat-log');
+                    chatLog.scrollTop = chatLog.scrollHeight;
+
+                }
+            };
+
+
+
+        </script>
+    </body>
+
+</div>
+
+
+{% endblock content %}

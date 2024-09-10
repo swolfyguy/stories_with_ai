@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+    .error {
+        color: red;
+    }
+</style>
+{% endblock style %}
+
+
+
+
+
+<div class="col-md-6 offset-md-3">
+    <h2>Login to get started</h2>
+    <hr>
+    <form method="POST">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {% for error in form.non_field_errors %}
+            <p class="form-text error">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            {{ form.username|add_class:"form-control"|attr:"placeholder:username"}}
+            {% if form.username.errors %}
+            <div class="form-errors">
+                {% for error in form.username.errors %}
+                <p class="form-text error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            {{ form.password|add_class:"form-control"|attr:"placeholder:password"|attr:"type:password"}}
+            {% if form.password.errors %}
+            <div class="form-errors">
+                {% for error in form.password.errors %}
+                <p class="form-text error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+
+    </form>
+</div>
+
+
+{% endblock content %}
